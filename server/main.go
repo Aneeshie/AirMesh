@@ -23,7 +23,31 @@ func main() {
 			continue
 		}
 
-		fmt.Println("Client connected: ", conn.RemoteAddr())
+		go handleConn(conn)
+
 	}
 
+}
+
+func handleConn(conn net.Conn) {
+	defer conn.Close()
+
+	fmt.Println("Client connected: ", conn.RemoteAddr())
+	//read data
+
+	buffer := make([]byte, 1024)
+
+	for {
+		n, err := conn.Read(buffer)
+		if err != nil {
+			fmt.Println("Could not read the stream: ", err)
+			return
+		}
+
+		message := string(buffer[:n])
+		fmt.Println("Client says: ", message)
+
+		response := "hello client from server"
+		conn.Write([]byte(response))
+	}
 }

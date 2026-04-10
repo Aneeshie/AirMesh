@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/binary"
+	"file-sharing-backend/protocol"
 	"fmt"
 	"net"
 )
@@ -35,19 +37,26 @@ func handleConn(conn net.Conn) {
 	fmt.Println("Client connected: ", conn.RemoteAddr())
 	//read data
 
-	buffer := make([]byte, 1024)
 
 	for {
-		n, err := conn.Read(buffer)
+		n, err := protocol.ReadExact(conn, 4)
+		if err != nil {
+			fmt.Println("Could not get the stream: ", err)
+			return
+		}
+
+		lengthBuf := binary.BigEndian.Uint32(n)
+
+		dataBuf, err := protocol.ReadExact(conn, int(lengthBuf))
 		if err != nil {
 			fmt.Println("Could not read the stream: ", err)
 			return
 		}
 
-		message := string(buffer[:n])
-		fmt.Println("Client says: ", message)
+
+		fmt.Println("Client says: ", string(dataBuf))
 
 		response := "hello client from server"
-		conn.Write([]byte(response))
+		protocol.SendMessage(conn, response)
 	}
 }

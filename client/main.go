@@ -3,6 +3,7 @@ package main
 import (
 	"file-sharing-backend/protocol"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"path/filepath"
@@ -20,7 +21,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	fileName, _, fileData, err := protocol.ParseDataReceived(conn)
+	fileName, fileSize, err := protocol.ParseDataReceived(conn)
 	if err != nil {
 		panic(err)
 	}
@@ -33,8 +34,41 @@ func main() {
 
 	outPath := filepath.Join("downloads", safeName)
 
-	if err := os.WriteFile(outPath, fileData, 0644); err != nil {
+	outFile, err := os.Create(outPath)
+	if err != nil {
 		panic(err)
 	}
+
+	defer outFile.Close()
+
+	buffer := make([]byte, 64*1024)
+	var received uint64 = 0
+
+	for received < fileSize {
+		remaining := fileSize - received
+		toRead := uint64(len(buffer))
+
+		toRead = min(toRead, remaining)
+
+		n, err := conn.Read(buffer[:toRead])
+
+		if n > 0 {
+			_, writeErr := outFile.Write(buffer[:n])
+			if writeErr != nil {
+				panic(writeErr)
+			}
+
+			received += uint64(n)
+		}
+
+		if err != nil {
+			if err == io.EOF && received == fileSize {
+				break
+			}
+			panic(err)
+		}
+	}
+
+	fmt.Println("Saved to:", outPath)
 
 }

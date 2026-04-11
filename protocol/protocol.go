@@ -1,9 +1,7 @@
 package protocol
 
 import (
-	"bytes"
 	"encoding/binary"
-	"fmt"
 	"io"
 	"net"
 	"os"
@@ -11,8 +9,6 @@ import (
 )
 
 func SendFile(conn net.Conn, path string) error {
-	var buf bytes.Buffer
-
 	baseName := filepath.Base(path)
 
 	file, err := os.Open(path)
@@ -21,11 +17,11 @@ func SendFile(conn net.Conn, path string) error {
 	}
 	defer file.Close()
 
-	n, err := buf.ReadFrom(file)
+	stat, err := file.Stat()
 	if err != nil {
-		fmt.Println("Could not read file:", err)
 		return err
 	}
+	fileSize := stat.Size()
 
 	//filename length
 	nameBytes := []byte(baseName)
@@ -34,13 +30,33 @@ func SendFile(conn net.Conn, path string) error {
 
 	//file size
 	sizeBuf := make([]byte, 8)
-	binary.BigEndian.PutUint64(sizeBuf, uint64(n))
+	binary.BigEndian.PutUint64(sizeBuf, uint64(fileSize))
 
 	conn.Write(nameLenBuf)
 	conn.Write(nameBytes)
 
 	conn.Write(sizeBuf)
-	conn.Write(buf.Bytes())
+
+	buffer := make([]byte, 64*1024)
+
+	for {
+		n, err := file.Read(buffer)
+
+		if n > 0 {
+			_, writeErr := conn.Write(buffer[:n])
+			if writeErr != nil {
+				return writeErr
+			}
+		}
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
@@ -66,30 +82,25 @@ func ReadExact(conn net.Conn, size uint64) ([]byte, error) {
 	return buffer, nil
 }
 
-func ParseDataReceived(conn net.Conn) (string, uint64, []byte, error) {
+func ParseDataReceived(conn net.Conn) (string, uint64, error) {
 	nameLenBuf, err := ReadExact(conn, 8)
 	if err != nil {
-		return "", 0, nil, err
+		return "", 0, err
 	}
+
 	nameLen := binary.BigEndian.Uint64(nameLenBuf)
 
 	nameBytes, err := ReadExact(conn, nameLen)
 	if err != nil {
-		return "", 0, nil, err
+		return "", 0, err
 	}
 
 	sizeBuf, err := ReadExact(conn, 8)
 	if err != nil {
-		return "", 0, nil, err
+		return "", 0, err
 	}
 
 	fileSize := binary.BigEndian.Uint64(sizeBuf)
 
-	fileData, err := ReadExact(conn, fileSize)
-	if err != nil {
-		return "", 0, nil, err
-	}
-
-	return string(nameBytes), fileSize, fileData, nil
-
+	return string(nameBytes), fileSize, nil
 }

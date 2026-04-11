@@ -1,6 +1,7 @@
 package main
 
 import (
+	"file-sharing-backend/discovery"
 	"file-sharing-backend/protocol"
 	"fmt"
 	"net"
@@ -10,6 +11,8 @@ func main() {
 	ip := getLocalIP()
 
 	fmt.Println("Share this address: ", ip+":8080")
+
+	discovery.StartResponder()
 
 	ln, err := net.Listen("tcp", ":8080")
 	if err != nil {

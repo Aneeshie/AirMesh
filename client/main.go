@@ -1,6 +1,7 @@
 package main
 
 import (
+	ui "file-sharing-backend/UI"
 	"file-sharing-backend/protocol"
 	"fmt"
 	"io"
@@ -59,6 +60,7 @@ func main() {
 			}
 
 			received += uint64(n)
+			ui.ShowProgress(received, fileSize)
 		}
 
 		if err != nil {
@@ -69,6 +71,6 @@ func main() {
 		}
 	}
 
-	fmt.Println("Saved to:", outPath)
+	ui.Done(outPath)
 
 }

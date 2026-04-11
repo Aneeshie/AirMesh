@@ -7,6 +7,10 @@ import (
 )
 
 func main() {
+	ip := getLocalIP()
+
+	fmt.Println("Share this address: ", ip+":8080")
+
 	ln, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		fmt.Println("Could not initiate the socket: ", err)
@@ -40,4 +44,26 @@ func handleConn(conn net.Conn) {
 		return
 	}
 
+}
+
+func getLocalIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "unknown"
+	}
+
+	for _, addrs := range addrs {
+		ipNet, ok := addrs.(*net.IPNet)
+		if !ok || ipNet.IP.IsLoopback() {
+			continue
+		}
+
+		ip := ipNet.IP.To4()
+		if ip != nil {
+			return ip.String()
+		}
+
+	}
+
+	return "unknown"
 }

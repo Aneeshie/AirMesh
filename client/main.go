@@ -2,13 +2,19 @@ package main
 
 import (
 	"file-sharing-backend/protocol"
+	"fmt"
 	"net"
 	"os"
 	"path/filepath"
 )
 
 func main() {
-	conn, err := net.Dial("tcp", "localhost:8080")
+	var ip string
+
+	fmt.Println("Enter server ip: ")
+	fmt.Scan(&ip)
+
+	conn, err := net.Dial("tcp", ip)
 	if err != nil {
 		panic(err)
 	}

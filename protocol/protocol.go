@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"path/filepath"
@@ -43,19 +44,51 @@ func SendMessage(conn net.Conn, path string) {
 	conn.Write(buf.Bytes())
 }
 
-func ReadExact(conn net.Conn, size int) ([]byte, error) {
+func ReadExact(conn net.Conn, size uint64) ([]byte, error) {
 	buffer := make([]byte, size)
-	total := 0
+	var total uint64 = 0
 
 	for total < size {
-		n, err := conn.Read(buffer)
+		n, err := conn.Read(buffer[total:])
 		if err != nil {
 			return nil, err
 		}
 
-		total += n
+		if n == 0 {
+			return nil, io.EOF
+		}
+
+		total += uint64(n)
 
 	}
 
 	return buffer, nil
+}
+
+func ParseDataReceived(conn net.Conn) (string, uint64, []byte, error) {
+	nameLenBuf, err := ReadExact(conn, 8)
+	if err != nil {
+		return "", 0, nil, err
+	}
+	nameLen := binary.BigEndian.Uint64(nameLenBuf)
+
+	nameBytes, err := ReadExact(conn, nameLen)
+	if err != nil {
+		return "", 0, nil, err
+	}
+
+	sizeBuf, err := ReadExact(conn, 8)
+	if err != nil {
+		return "", 0, nil, err
+	}
+
+	fileSize := binary.BigEndian.Uint64(sizeBuf)
+
+	fileData, err := ReadExact(conn, fileSize)
+	if err != nil {
+		return "", 0, nil, err
+	}
+
+	return string(nameBytes), fileSize, fileData, nil
+
 }

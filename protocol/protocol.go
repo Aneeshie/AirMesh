@@ -2,10 +2,12 @@ package protocol
 
 import (
 	"encoding/binary"
+	ui "file-sharing-backend/UI"
 	"io"
 	"net"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func SendFile(conn net.Conn, path string) error {
@@ -38,8 +40,10 @@ func SendFile(conn net.Conn, path string) error {
 	conn.Write(sizeBuf)
 
 	buffer := make([]byte, 64*1024)
-
+	var sent uint64 = 0
+	start := time.Now()
 	for {
+
 		n, err := file.Read(buffer)
 
 		if n > 0 {
@@ -47,6 +51,9 @@ func SendFile(conn net.Conn, path string) error {
 			if writeErr != nil {
 				return writeErr
 			}
+
+			sent += uint64(n)
+			ui.ShowProgress(sent, uint64(fileSize), start)
 		}
 
 		if err == io.EOF {
@@ -56,13 +63,15 @@ func SendFile(conn net.Conn, path string) error {
 		if err != nil {
 			return err
 		}
+
 	}
 
+	ui.Done("Send Successfully")
 	return nil
 }
 
 func ReadExact(conn net.Conn, size uint64) ([]byte, error) {
-	buffer := make([]byte, size)
+	buffer := make([]byte, int(size))
 	var total uint64 = 0
 
 	for total < size {

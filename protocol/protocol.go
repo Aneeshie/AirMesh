@@ -10,22 +10,21 @@ import (
 	"path/filepath"
 )
 
-func SendMessage(conn net.Conn, path string) {
+func SendFile(conn net.Conn, path string) error {
 	var buf bytes.Buffer
 
 	baseName := filepath.Base(path)
 
 	file, err := os.Open(path)
 	if err != nil {
-		fmt.Println("Could not open file:", err)
-		return
+		return err
 	}
 	defer file.Close()
 
 	n, err := buf.ReadFrom(file)
 	if err != nil {
 		fmt.Println("Could not read file:", err)
-		return
+		return err
 	}
 
 	//filename length
@@ -42,6 +41,8 @@ func SendMessage(conn net.Conn, path string) {
 
 	conn.Write(sizeBuf)
 	conn.Write(buf.Bytes())
+
+	return nil
 }
 
 func ReadExact(conn net.Conn, size uint64) ([]byte, error) {

@@ -1,39 +1,34 @@
 package main
 
 import (
-	"encoding/binary"
 	"file-sharing-backend/protocol"
-	"fmt"
 	"net"
+	"os"
+	"path/filepath"
 )
 
-func main(){
-	conn, err := net.Dial("tcp", ":8080")
+func main() {
+	conn, err := net.Dial("tcp", "localhost:8080")
 	if err != nil {
 		panic(err)
 	}
 	defer conn.Close()
 
-	message := "hello server"
-	protocol.SendMessage(conn, message)
-
-	n, err := protocol.ReadExact(conn, 4)
+	fileName, _, fileData, err := protocol.ParseDataReceived(conn)
 	if err != nil {
 		panic(err)
 	}
 
-	lengthBuf := binary.BigEndian.Uint32(n)
-
-	dataBuf, err := protocol.ReadExact(conn, int(lengthBuf))
-	if err != nil {
-		fmt.Println("Could not get data stream ", err)
-		return
+	if err := os.MkdirAll("downloads", 0755); err != nil {
+		panic(err)
 	}
 
-	messageReceived := string(dataBuf)
+	safeName := filepath.Base(fileName)
 
-	fmt.Println("Message by server: ",messageReceived)
+	outPath := filepath.Join("downloads", safeName)
+
+	if err := os.WriteFile(outPath, fileData, 0644); err != nil {
+		panic(err)
+	}
 
 }
-
-

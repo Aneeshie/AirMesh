@@ -8,12 +8,13 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func main() {
 	var ip string
 
-	fmt.Println("Enter server ip: ")
+	fmt.Print("Enter server ip: ")
 	fmt.Scan(&ip)
 
 	conn, err := net.Dial("tcp", ip)
@@ -45,13 +46,14 @@ func main() {
 	buffer := make([]byte, 64*1024)
 	var received uint64 = 0
 
+	start := time.Now()
 	for received < fileSize {
 		remaining := fileSize - received
 		toRead := uint64(len(buffer))
 
 		toRead = min(toRead, remaining)
 
-		n, err := conn.Read(buffer[:toRead])
+		n, err := conn.Read(buffer[:int(toRead)])
 
 		if n > 0 {
 			_, writeErr := outFile.Write(buffer[:n])
@@ -60,7 +62,7 @@ func main() {
 			}
 
 			received += uint64(n)
-			ui.ShowProgress(received, fileSize)
+			ui.ShowProgress(received, fileSize, start)
 		}
 
 		if err != nil {

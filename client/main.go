@@ -2,6 +2,7 @@ package main
 
 import (
 	ui "file-sharing-backend/UI"
+	"file-sharing-backend/discovery"
 	"file-sharing-backend/protocol"
 	"fmt"
 	"io"
@@ -14,8 +15,19 @@ import (
 func main() {
 	var ip string
 
-	fmt.Print("Enter server ip: ")
-	fmt.Scan(&ip)
+	peers := discovery.ScanPeers()
+	discovery.PrintPeers(peers)
+
+	if len(peers) > 0 {
+		var choice int
+		fmt.Print("Choose device number: ")
+		fmt.Scan(&choice)
+
+		ip = peers[choice-1].Address
+	} else {
+		fmt.Print("Enter server ip: ")
+		fmt.Scan(&ip)
+	}
 
 	conn, err := net.Dial("tcp", ip)
 	if err != nil {

@@ -1,8 +1,10 @@
 package discovery
 
 import (
+	"fmt"
 	"net"
 	"os"
+	"strings"
 )
 
 func StartResponder() {
@@ -11,10 +13,15 @@ func StartResponder() {
 		IP:   net.IPv4zero,
 	}
 
+	fmt.Println("Starting UDP responder on :9999")
+
 	conn, err := net.ListenUDP("udp", &addr)
 	if err != nil {
-		panic(err)
+		fmt.Println("UDP responder failed:", err)
+		return
 	}
+
+	fmt.Println("UDP responder ready")
 
 	go func() {
 		defer conn.Close()
@@ -27,15 +34,18 @@ func StartResponder() {
 				continue
 			}
 
-			msg := string(buffer[:n])
+			msg := strings.TrimSpace(string(buffer[:n]))
 
 			if msg == "DISCOVER_FILE_SERVER" {
 				host, _ := os.Hostname()
-				reply := "FILE_SERVER_RESPONSE:" + host
+
+				reply := host + "|8080"
+
+				fmt.Println("Discovery request from:", clientAddr)
+				fmt.Println("Sending reply:", reply)
 
 				conn.WriteToUDP([]byte(reply), clientAddr)
 			}
 		}
 	}()
-
 }

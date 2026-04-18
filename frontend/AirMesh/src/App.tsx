@@ -85,7 +85,7 @@ export default function App() {
 
   const fadeClass = exiting
     ? "opacity-0 translate-y-4 scale-95"
-    : "opacity-100 translate-y-0 scale-100";
+    : "opacity-100";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-zinc-950 text-white">
@@ -177,44 +177,43 @@ export default function App() {
         {/* STEP: App */}
         {step === "app" && (
           <div
-            className={`w-full max-w-3xl transition-all duration-400 ease-out ${fadeClass}`}
+            className={`fixed inset-0 flex flex-col transition-all duration-400 ease-out z-10 pointer-events-none ${fadeClass}`}
           >
-            <div className="rounded-3xl border border-white/10 bg-zinc-900/70 backdrop-blur-xl shadow-2xl p-8 space-y-8">
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold">AirMesh</h1>
-                  <p className="text-zinc-400 text-sm">Local file sharing</p>
-                </div>
-                {/* Mode toggle */}
-                <div className="flex gap-2 p-1 rounded-xl bg-zinc-800/80">
-                  <button
-                    onClick={() => setMode(Mode.Sender)}
-                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                      mode === Mode.Sender
-                        ? "bg-white text-zinc-900"
-                        : "text-zinc-400 hover:text-white"
-                    }`}
-                  >
-                    📤 Sender
-                  </button>
-                  <button
-                    onClick={() => setMode(Mode.Receiver)}
-                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                      mode === Mode.Receiver
-                        ? "bg-white text-zinc-900"
-                        : "text-zinc-400 hover:text-white"
-                    }`}
-                  >
-                    📥 Receiver
-                  </button>
-                </div>
+            {/* HUD Header */}
+            <div className="absolute top-0 left-0 right-0 p-6 flex flex-col md:flex-row items-center justify-between z-50 pointer-events-auto">
+              <div className="mb-4 md:mb-0 text-center md:text-left drop-shadow-md">
+                <h1 className="text-3xl font-bold tracking-tight text-white/90">AirMesh</h1>
+                <p className="text-zinc-400 text-sm">Local mesh transfer</p>
               </div>
+              
+              {/* Mode toggle */}
+              <div className="flex gap-2 p-1.5 rounded-2xl bg-zinc-900/60 backdrop-blur-md border border-white/10 shadow-xl">
+                <button
+                  onClick={() => setMode(Mode.Sender)}
+                  className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                    mode === Mode.Sender
+                      ? "bg-white text-zinc-900 shadow-md scale-[1.03]"
+                      : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  📤 Sender
+                </button>
+                <button
+                  onClick={() => setMode(Mode.Receiver)}
+                  className={`px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                    mode === Mode.Receiver
+                      ? "bg-white text-zinc-900 shadow-md scale-[1.03]"
+                      : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  📥 Receiver
+                </button>
+              </div>
+            </div>
 
-              {/* Page content */}
-              <div className="rounded-2xl border border-white/5 bg-zinc-950/50 p-6 min-h-[350px]">
-                {mode === Mode.Sender ? <SenderPage /> : <ReceiverPage />}
-              </div>
+            {/* Page content */}
+            <div className="flex-1 w-full relative z-10 flex flex-col items-center justify-center pt-24 pb-12 pointer-events-auto">
+              {mode === Mode.Sender ? <SenderPage /> : <ReceiverPage />}
             </div>
           </div>
         )}

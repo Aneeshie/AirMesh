@@ -39,7 +39,7 @@ func StartResponder() {
 			if msg == "DISCOVER_FILE_SERVER" {
 				host, _ := os.Hostname()
 
-				reply := host + "|8080"
+0"
 
 				fmt.Println("Discovery request from:", clientAddr)
 				fmt.Println("Sending reply:", reply)

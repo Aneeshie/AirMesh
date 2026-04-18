@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+
 	ip := getLocalIP()
 
 	fmt.Println("Share this address: ", ip+":8080")

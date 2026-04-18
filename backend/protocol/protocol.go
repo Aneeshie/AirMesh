@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+// the protocol is basically [fileNameLen][fileNameInBytes][FileSizeLen][chunks][chunks]
+
 func SendFile(conn net.Conn, path string) error {
 	baseName := filepath.Base(path)
 

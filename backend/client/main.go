@@ -13,6 +13,7 @@ import (
 )
 
 func main() {
+
 	var ip string
 
 	peers := discovery.ScanPeers()

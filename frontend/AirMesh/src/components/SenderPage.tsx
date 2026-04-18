@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useLayoutEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 interface Peer {
   id: string;
   name: string;
@@ -198,95 +198,94 @@ export default function SenderPage() {
           </span>
         </div>
 
-      {/* Status */}
-      <div className="text-center space-y-1">
-        {peers.length === 0 ? (
-          <>
-            <p className="text-zinc-300 text-sm font-medium">No peers found</p>
-            <p className="text-zinc-600 text-xs">
-              Devices on the same network will appear on radar
-            </p>
-          </>
-        ) : (
-          <>
-            <p className="text-zinc-300 text-sm font-medium">
-              {peers.length} peer{peers.length > 1 ? "s" : ""} nearby
-            </p>
-            <p className="text-zinc-600 text-xs">Tap a blip to send files</p>
-          </>
-        )}
-      </div>
+        {/* Status */}
+        <div className="text-center space-y-1">
+          {peers.length === 0 ? (
+            <>
+              <p className="text-zinc-300 text-sm font-medium">No peers found</p>
+              <p className="text-zinc-600 text-xs">
+                Devices on the same network will appear on radar
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-zinc-300 text-sm font-medium">
+                {peers.length} peer{peers.length > 1 ? "s" : ""} nearby
+              </p>
+              <p className="text-zinc-600 text-xs">Tap a blip to send files</p>
+            </>
+          )}
+        </div>
 
-      {/* Dev helper — remove when real discovery is wired */}
-      <button
-        onClick={addMockPeer}
-        className="text-xs text-indigo-400/60 hover:text-indigo-400 transition-colors"
-      >
-        + simulate peer discovery
-      </button>
+        {/* Dev helper — remove when real discovery is wired */}
+        <button
+          onClick={addMockPeer}
+          className="text-xs text-indigo-400/60 hover:text-indigo-400 transition-colors"
+        >
+          + simulate peer discovery
+        </button>
 
-      {/* Peer list */}
-      {peers.length > 0 && (
-        <div className="w-full space-y-2">
-          {peers.map((peer) => (
-            <button
-              key={peer.id}
-              onClick={() => setSelectedPeer(peer)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-150 ${
-                selectedPeer?.id === peer.id
-                  ? "border-white/20 bg-white/10"
-                  : "border-white/5 bg-white/[0.03] hover:bg-white/[0.07]"
-              }`}
-            >
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                style={{
-                  backgroundColor: peer.color.bg,
-                  color: peer.color.text,
-                }}
+        {/* Peer list */}
+        {peers.length > 0 && (
+          <div className="w-full space-y-2">
+            {peers.map((peer) => (
+              <button
+                key={peer.id}
+                onClick={() => setSelectedPeer(peer)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-150 ${selectedPeer?.id === peer.id
+                    ? "border-white/20 bg-white/10"
+                    : "border-white/5 bg-white/[0.03] hover:bg-white/[0.07]"
+                  }`}
               >
-                {peer.initials}
-              </div>
-              <div className="text-left">
-                <div className="text-white text-sm font-medium">
-                  {peer.name}
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                  style={{
+                    backgroundColor: peer.color.bg,
+                    color: peer.color.text,
+                  }}
+                >
+                  {peer.initials}
                 </div>
-                <div className="text-zinc-500 text-xs">Ready to receive</div>
-              </div>
-              <div className="ml-auto">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
+                <div className="text-left">
+                  <div className="text-white text-sm font-medium">
+                    {peer.name}
+                  </div>
+                  <div className="text-zinc-500 text-xs">Ready to receive</div>
+                </div>
+                <div className="ml-auto">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
 
-      {/* Send panel */}
-      {selectedPeer && (
-        <div className="w-full rounded-2xl border border-indigo-500/30 bg-indigo-500/10 backdrop-blur-md p-4 space-y-3 shadow-2xl relative z-20">
-          <p className="text-sm text-zinc-300">
-            Sending to{" "}
-            <span
-              className="font-medium px-2 py-0.5 rounded shadow-sm text-white"
-              style={{ backgroundColor: (selectedPeer as Peer).color.bg }}
-            >
-              {(selectedPeer as Peer).name}
-            </span>
-          </p>
-          <label className="block w-full border-2 border-dashed border-indigo-500/30 bg-white/5 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-400/60 hover:bg-white/10 transition-colors">
-            <input type="file" className="hidden" multiple />
-            <div className="text-zinc-300 text-sm font-medium">
-              Drop files here or click to browse
-            </div>
-            <div className="text-zinc-500 text-xs mt-1">
-              Supports multiples sizes
-            </div>
-          </label>
-          <button className="w-full py-3 rounded-xl bg-indigo-500 text-white font-semibold text-sm hover:bg-indigo-400 active:scale-[0.98] transition-all shadow-lg shadow-indigo-500/20">
-            Send files secure
-          </button>
-        </div>
-      )}
+        {/* Send panel */}
+        {selectedPeer && (
+          <div className="w-full rounded-2xl border border-indigo-500/30 bg-indigo-500/10 backdrop-blur-md p-4 space-y-3 shadow-2xl relative z-20">
+            <p className="text-sm text-zinc-300">
+              Sending to{" "}
+              <span
+                className="font-medium px-2 py-0.5 rounded shadow-sm text-white"
+                style={{ backgroundColor: (selectedPeer as Peer).color.bg }}
+              >
+                {(selectedPeer as Peer).name}
+              </span>
+            </p>
+            <label className="block w-full border-2 border-dashed border-indigo-500/30 bg-white/5 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-400/60 hover:bg-white/10 transition-colors">
+              <input type="file" className="hidden" multiple />
+              <div className="text-zinc-300 text-sm font-medium">
+                Drop files here or click to browse
+              </div>
+              <div className="text-zinc-500 text-xs mt-1">
+                Supports multiples sizes
+              </div>
+            </label>
+            <button className="w-full py-3 rounded-xl bg-indigo-500 text-white font-semibold text-sm hover:bg-indigo-400 active:scale-[0.98] transition-all shadow-lg shadow-indigo-500/20">
+              Send files secure
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
